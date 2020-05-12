@@ -107,24 +107,25 @@ impl EventHandler for Handler {
                 userids.insert(uid);
                 n_of_users += 1;
             }
-            if game_mode == "solo" {
-                if userids.len() != 1 {
-                    send(&ctx, &msg.channel_id, ":x: Only one user can play solo");
-                    return;
-                }
-            }
             if userids.len() != n_of_users {
                 send(&ctx, &msg.channel_id, ":x: Repeating users");
                 return;
             }
             let userids: Vec<u64> = userids.into_iter().collect();
-            if userids.len() > 10 {
-                send(&ctx, &msg.channel_id, ":x: Play is currently limited to 10 users");
-                return;
-            }
-            if userids.len() == 0 || userids.len() == 1 {
-                send(&ctx, &msg.channel_id, ":x: Please enter at least 2 users");
-                return;
+            if game_mode == "solo" {
+                if userids.len() != 1 {
+                    send(&ctx, &msg.channel_id, ":x: Only one user can play solo");
+                    return;
+                }
+            } else if game_mode == "snake" {
+                if userids.len() == 0 || userids.len() == 1 {
+                    send(&ctx, &msg.channel_id, ":x: Please enter at least 2 users");
+                    return;
+                }
+                if userids.len() > 10 {
+                    send(&ctx, &msg.channel_id, ":x: Play is currently limited to 10 users");
+                    return;
+                }
             }
             let (tx, rx) = mpsc::channel::<(u64, Vector2)>();
             hm.insert(msg.channel_id.clone(), tx);
