@@ -1,0 +1,12 @@
+[package]
+name = "discord-snake"
+version = "0.1.0"
+authors = ["Bill Kudo <bluesky42624@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serenity = "0.8"
+regex = "1"
+rand = "0.7.3"
