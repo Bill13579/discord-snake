@@ -6,7 +6,7 @@ use std::{thread, thread::sleep};
 
 use std::time::Duration;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use regex::Regex;
 
@@ -90,7 +90,8 @@ impl EventHandler for Handler {
                 send(&ctx, &msg.channel_id, &format!(":x: Round already in progress in channel <#{}>", &msg.channel_id));
                 return;
             }
-            let mut userids: Vec<u64> = Vec::new();
+            let mut userids: HashSet<u64> = HashSet::new();
+            let mut n_of_users = 0;
             for v in Regex::new(r"\s*?<@!?([&]?)([0-9]*)>\s*?").expect("invalid regex").captures_iter(c.get(1).unwrap().as_str()) {
                 if v.get(1).unwrap().as_str().trim() != "" {
                     send(&ctx, &msg.channel_id, ":x: A role can't play snake");
@@ -102,8 +103,14 @@ impl EventHandler for Handler {
                     return;
                 }
                 let uid: u64 = uid.unwrap();
-                userids.push(uid);
+                userids.insert(uid);
+                n_of_users += 1;
             }
+            if userids.len() != n_of_users {
+                send(&ctx, &msg.channel_id, ":x: Repeating users");
+                return;
+            }
+            let userids: Vec<u64> = userids.into_iter().collect();
             if userids.len() > 10 {
                 send(&ctx, &msg.channel_id, ":x: Play is currently limited to 10 users");
                 return;
