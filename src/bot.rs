@@ -11,13 +11,27 @@ use std::collections::{HashMap, HashSet};
 use regex::Regex;
 
 use serenity::{
-    model::{channel::Message, channel::Reaction, channel::ReactionType, id::{ChannelId, UserId}},
+    model::{channel::Message, channel::Reaction, channel::ReactionType, guild::Guild, id::{ChannelId, UserId}},
     prelude::*,
 };
 
 use discord_snake::{Game, Vector2, Player};
 
 const SNAKE_CMD: &str = r"^::(snake|solo) *(.*?) *$";
+const HELP_CMD: &str = r"^::help *$";
+
+const HELP: &str = "**Welcome to the wonderful world of Discord Snake!**
+
+> **Commands**
+
+Normal (multiplayer)
+`::snake @you @someoneElse @up-to-10-people! @you-get-the-idea`
+
+Solo
+`::solo @you`
+
+Help
+`::help` (I think that's intuitive enough)";
 
 const GAME_OVER: &str = r"   _____                         ____
  / ____|                       / __ \
@@ -162,6 +176,8 @@ impl EventHandler for Handler {
                     }
                 }
             });
+        } else if let Some(c) = Regex::new(HELP_CMD).expect("invalid regex").captures(&msg.content) {
+            send(&ctx, &msg.channel_id, HELP);
         }
     }
     fn reaction_add(&self, ctx: Context, react: Reaction) {
@@ -169,5 +185,10 @@ impl EventHandler for Handler {
     }
     fn reaction_remove(&self, ctx: Context, react: Reaction) {
         self.react(ctx, react);
+    }
+    fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
+        if let Some(e) = guild.default_channel(ctx.cache.read().user.id) {
+            send(&ctx, &e.read().id, HELP);
+        }
     }
 }
