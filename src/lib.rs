@@ -97,6 +97,7 @@ impl Clone for Player {
 
 pub struct Game {
     pub stage: u64,
+    game_mode: String,
     players: Vec<Player>,
     board: Vec<Vec<Actor>>,
     board_size: Vector2,
@@ -104,7 +105,7 @@ pub struct Game {
 }
 //⬆➡⬇⬅
 impl Game {
-    pub fn new(pid: &[u64]) -> Game {
+    pub fn new(game_mode: String, pid: &[u64]) -> Game {
         let mut board = Game::empty_board();
         let mut players = Vec::new();
         for p in 0..pid.len() {
@@ -113,7 +114,8 @@ impl Game {
             board[r][2] = Actor::Player(p);
             players.push(Player::new(pid[p], vec![Vector2(2, r as i64), Vector2(3, r as i64)], Vector2(1, 0)));
         }
-        Game { stage: 0,
+        Game { game_mode,
+            stage: 0,
             players,
             board,
             board_size: BOARD_SIZE,
@@ -223,7 +225,7 @@ impl Game {
         }
         let winners = if non_dead.len() == 0 {
             Some(winners.into_iter().collect())
-        } else if non_dead.len() == 1 {
+        } else if self.game_mode != "solo" && non_dead.len() == 1 {
             Some(vec![non_dead[0]])
         } else {
             None

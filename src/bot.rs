@@ -17,7 +17,7 @@ use serenity::{
 
 use discord_snake::{Game, Vector2, Player};
 
-const SNAKE_CMD: &str = r"^::snake *(.*?) *$";
+const SNAKE_CMD: &str = r"^::(snake|solo) *(.*?) *$";
 
 const GAME_OVER: &str = r"   _____                         ____
  / ____|                       / __ \
@@ -92,7 +92,8 @@ impl EventHandler for Handler {
             }
             let mut userids: HashSet<u64> = HashSet::new();
             let mut n_of_users = 0;
-            for v in Regex::new(r"\s*?<@!?([&]?)([0-9]*)>\s*?").expect("invalid regex").captures_iter(c.get(1).unwrap().as_str()) {
+            let mut game_mode = c.get(1).unwrap().as_str().to_owned();
+            for v in Regex::new(r"\s*?<@!?([&]?)([0-9]*)>\s*?").expect("invalid regex").captures_iter(c.get(2).unwrap().as_str()) {
                 if v.get(1).unwrap().as_str().trim() != "" {
                     send(&ctx, &msg.channel_id, ":x: A role can't play snake");
                     return;
@@ -105,6 +106,12 @@ impl EventHandler for Handler {
                 let uid: u64 = uid.unwrap();
                 userids.insert(uid);
                 n_of_users += 1;
+            }
+            if game_mode == "solo" {
+                if userids.len() != 1 {
+                    send(&ctx, &msg.channel_id, ":x: Only one user can play solo");
+                    return;
+                }
             }
             if userids.len() != n_of_users {
                 send(&ctx, &msg.channel_id, ":x: Repeating users");
@@ -123,7 +130,7 @@ impl EventHandler for Handler {
             hm.insert(msg.channel_id.clone(), tx);
             let mut hm = self.sessions.clone();
             thread::spawn(move || {
-                let mut g = Game::new(&userids);
+                let mut g = Game::new(game_mode, &userids);
                 let mut b = g.as_str();
                 let mut m = send(&ctx, &msg.channel_id, &b);
                 m.react(&ctx, ReactionType::Unicode(String::from("⬆")));
