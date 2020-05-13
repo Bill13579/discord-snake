@@ -15,7 +15,7 @@ use serenity::{
     prelude::*,
 };
 
-use discord_snake::{Game, Vector2, Player};
+use discord_snake::{Game, Vector2, Player, UP, RIGHT, DOWN, LEFT};
 
 const SNAKE_CMD: &str = r"^::(snake|solo) *(.*?) *$";
 const HELP_CMD: &str = r"^::help *$";
@@ -84,10 +84,10 @@ impl Handler {
             if let ReactionType::Unicode(em) = react.emoji {
                 let mut unknown = false;
                 let v = match em.as_str() {
-                    "⬆" => Vector2(0, -1),
-                    "➡" => Vector2(1, 0),
-                    "⬇" => Vector2(0, 1),
-                    "⬅" => Vector2(-1, 0),
+                    "⬆" => UP,
+                    "➡" => RIGHT,
+                    "⬇" => DOWN,
+                    "⬅" => LEFT,
                     _ => return,
                 };
                 r.send((react.user_id.0, v));
