@@ -146,17 +146,7 @@ impl Game {
                     Actor::Empty => "-", //:white_large_square:?
                     Actor::Fruit => "*",
                     Actor::Player(i) => if let Some(p) = heads.get(&Vector2(x as i64, y as i64)) {
-                        if p.dir == UP {
-                            "⌄"
-                        } else if p.dir == RIGHT {
-                            "<"
-                        } else if p.dir == DOWN {
-                            "^"
-                        } else if p.dir == LEFT {
-                            ">"
-                        } else {
-                            "O"
-                        }
+                        "O"
                     } else {
                         PLAYERS[*i]
                     },
