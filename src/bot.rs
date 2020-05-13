@@ -28,7 +28,7 @@ Normal (multiplayer)
 `::snake @you @someoneElse @up-to-10-people! @you-get-the-idea`
 
 Solo
-`::solo @you`
+`::solo`
 
 Help
 `::help` (I think that's intuitive enough)";
@@ -104,9 +104,9 @@ impl EventHandler for Handler {
                 send(&ctx, &msg.channel_id, &format!(":x: Round already in progress in channel <#{}>", &msg.channel_id));
                 return;
             }
+            let mut game_mode = c.get(1).unwrap().as_str().to_owned();
             let mut userids: HashSet<u64> = HashSet::new();
             let mut n_of_users = 0;
-            let mut game_mode = c.get(1).unwrap().as_str().to_owned();
             for v in Regex::new(r"\s*?<@!?([&]?)([0-9]*)>\s*?").expect("invalid regex").captures_iter(c.get(2).unwrap().as_str()) {
                 if v.get(1).unwrap().as_str().trim() != "" {
                     send(&ctx, &msg.channel_id, ":x: A role can't play snake");
@@ -125,12 +125,10 @@ impl EventHandler for Handler {
                 send(&ctx, &msg.channel_id, ":x: Repeating users");
                 return;
             }
-            let userids: Vec<u64> = userids.into_iter().collect();
+            let mut userids: Vec<u64> = userids.into_iter().collect();
             if game_mode == "solo" {
-                if userids.len() != 1 {
-                    send(&ctx, &msg.channel_id, ":x: Only one user can play solo");
-                    return;
-                }
+                userids.clear();
+                userids.push(msg.author.id.0);
             } else if game_mode == "snake" {
                 if userids.len() == 0 || userids.len() == 1 {
                     send(&ctx, &msg.channel_id, ":x: Please enter at least 2 users");
