@@ -139,12 +139,27 @@ impl Game {
     }
     pub fn as_str(&self) -> String {
         let mut s = String::new();
-        for r in &self.board {
-            for c in r {
+        let heads: HashMap<Vector2, &Player> = self.players.iter().map(|p| (p.coords[p.coords.len()-1].clone(), p)).collect();
+        for (y, r) in self.board.iter().enumerate() {
+            for (x, c) in r.iter().enumerate() {
                 s += match c {
                     Actor::Empty => "-", //:white_large_square:?
                     Actor::Fruit => "*",
-                    Actor::Player(i) => PLAYERS[*i],
+                    Actor::Player(i) => if let Some(p) = heads.get(&Vector2(x as i64, y as i64)) {
+                        if p.dir == UP {
+                            "⌄"
+                        } else if p.dir == RIGHT {
+                            "<"
+                        } else if p.dir == DOWN {
+                            "^"
+                        } else if p.dir == LEFT {
+                            ">"
+                        } else {
+                            "O"
+                        }
+                    } else {
+                        PLAYERS[*i]
+                    },
                 };
             }
             s += "\n";
