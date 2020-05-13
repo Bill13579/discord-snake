@@ -1,6 +1,6 @@
 use std::process;
 
-use std::sync::{RwLock, Arc, Mutex, mpsc, mpsc::{Sender}};
+use std::sync::{Arc, Mutex, mpsc, mpsc::{Sender}};
 
 use std::{thread, thread::sleep};
 
@@ -15,7 +15,7 @@ use serenity::{
     prelude::*,
 };
 
-use discord_snake::{Game, Vector2, Player, UP, RIGHT, DOWN, LEFT};
+use discord_snake::{Game, Vector2, Player, UP, RIGHT, DOWN, LEFT, CANCEL};
 
 const SNAKE_CMD: &str = r"^::(snake|solo) *(.*?) *$";
 const HELP_CMD: &str = r"^::help *$";
@@ -88,6 +88,7 @@ impl Handler {
                     "➡" => RIGHT,
                     "⬇" => DOWN,
                     "⬅" => LEFT,
+                    "❌" => CANCEL,
                     _ => return,
                 };
                 r.send((react.user_id.0, v));
@@ -150,12 +151,19 @@ impl EventHandler for Handler {
                 m.react(&ctx, ReactionType::Unicode(String::from("➡")));
                 m.react(&ctx, ReactionType::Unicode(String::from("⬇")));
                 m.react(&ctx, ReactionType::Unicode(String::from("⬅")));
+                m.react(&ctx, ReactionType::Unicode(String::from("❌")));
                 g.stage = m.id.0;
                 loop {
                     sleep(Duration::from_secs_f32(1.001));
                     while let Ok(m) = rx.try_recv() {
                         if let Some(p) = g.get_player_by_id(m.0) {
-                            p.set_dir(m.1);
+                            if m.1 == CANCEL {
+                                p.set_as_dead();
+                            } else {
+                                if !p.is_dead() {
+                                    p.set_dir(m.1);
+                                }
+                            }
                         }
                     }
                     let (gb, w) = g.tick();

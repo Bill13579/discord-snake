@@ -9,6 +9,7 @@ pub const UP: Vector2 = Vector2(0, -1);
 pub const RIGHT: Vector2 = Vector2(1, 0);
 pub const DOWN: Vector2 = Vector2(0, 1);
 pub const LEFT: Vector2 = Vector2(-1, 0);
+pub const CANCEL: Vector2 = Vector2(0, 0);
 
 #[derive(Hash)]
 pub struct Vector2(pub i64, pub i64);
