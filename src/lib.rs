@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use rand::{thread_rng, Rng, rngs::ThreadRng, distributions::Uniform};
 
-const PLAYERS: [&str; 10] = ["#", "@", "%", "$", "*", "z", "+", "=", "?", "Q"];
+const PLAYERS: [&str; 10] = ["#", "@", "%", "$", "z", "*", "+", "=", "?", "Q"];
 
 const BOARD_SIZE: Vector2 = Vector2(64, 24);
 pub const UP: Vector2 = Vector2(0, -1);
