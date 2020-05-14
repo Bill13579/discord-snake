@@ -25,7 +25,7 @@ const HELP: &str = "**Welcome to the wonderful world of Discord Snake!**
 > **Commands**
 
 Normal (multiplayer)
-`::snake @you @someoneElse @up-to-10-people! @you-get-the-idea`
+`::snake @you @someoneElse @up-to-5-people! @you-get-the-idea`
 
 Solo
 `::solo`
@@ -39,6 +39,8 @@ const GAME_OVER: &str = r"   _____                         ____
 | | |_ |/ _` | '_ ` _ \ / _ \ | |  | \ \ / / _ \ '__|
 | |__| | (_| | | | | | |  __/ | |__| |\ V /  __/ |
  \_____|\__,_|_| |_| |_|\___|  \____/  \_/ \___|_|";
+
+const MAX_PLAYERS: usize = 5;
 
 fn send(ctx: &Context, c: &ChannelId, msg: &str) -> Message {
     match c.say(ctx.http.clone(), msg) {
@@ -135,8 +137,8 @@ impl EventHandler for Handler {
                     send(&ctx, &msg.channel_id, ":x: Please enter at least 2 users");
                     return;
                 }
-                if userids.len() > 10 {
-                    send(&ctx, &msg.channel_id, ":x: Play is currently limited to 10 users");
+                if userids.len() > MAX_PLAYERS {
+                    send(&ctx, &msg.channel_id, &format!(":x: Play is currently limited to {} users", MAX_PLAYERS));
                     return;
                 }
             }
