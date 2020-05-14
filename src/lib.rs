@@ -11,6 +11,8 @@ pub const DOWN: Vector2 = Vector2(0, 1);
 pub const LEFT: Vector2 = Vector2(-1, 0);
 pub const CANCEL: Vector2 = Vector2(0, 0);
 
+pub const POINTS_PER_KILL: u64 = 3;
+
 #[derive(Hash)]
 pub struct Vector2(pub i64, pub i64);
 
@@ -58,6 +60,7 @@ pub struct Player {
     coords: Vec<Vector2>,
     dir: Vector2,
     score: u64,
+    kills: u64,
     dead: bool,
 }
 
@@ -68,6 +71,7 @@ impl Player {
             coords,
             dir: initial_dir,
             score: 0,
+            kills: 0,
             dead: false,
         }
     }
@@ -84,7 +88,10 @@ impl Player {
         self.id
     }
     pub fn get_score(&self) -> u64 {
-        self.score
+        self.score + self.kills * POINTS_PER_KILL
+    }
+    pub fn get_kills(&self) -> u64 {
+        self.kills
     }
 }
 
@@ -95,6 +102,7 @@ impl Clone for Player {
             coords: self.coords.clone(),
             dir: self.dir.clone(),
             score: self.score,
+            kills: self.kills,
             dead: self.dead,
         }
     }
@@ -173,7 +181,7 @@ impl Game {
     }
     pub fn get_rankings(&self) -> Vec<Player> {
         let mut players = self.players.clone();
-        players.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
+        players.sort_by(|a, b| b.get_score().partial_cmp(&a.get_score()).unwrap());
         let mut dead = Vec::new();
         let mut alive = Vec::new();
         for p in players {
@@ -192,6 +200,7 @@ impl Game {
         }
         let mut winners: HashSet<u64> = HashSet::new();
         let mut new_positions: HashMap<Vector2, &mut Player> = HashMap::new();
+        let mut new_kills: HashMap<usize, u64> = HashMap::new();
         for (i, ap) in self.players.iter_mut().enumerate() {
             if !ap.is_dead() {
                 let mut got_fruit = false;
@@ -203,8 +212,11 @@ impl Game {
                         ap.score += 1;
                         got_fruit = true;
                     },
-                    Actor::Player(i) => {
+                    Actor::Player(ki) => {
                         ap.set_as_dead();
+                        if ki != i {
+                            *new_kills.entry(ki).or_insert(0) += 1;
+                        }
                         winners.insert(ap.id);
                     },
                 }
@@ -226,6 +238,9 @@ impl Game {
                     },
                 }
             }
+        }
+        for (ki, k) in new_kills.iter() {
+            self.players[*ki].kills += *k;
         }
         let mut non_dead = Vec::new();
         for p in &self.players {

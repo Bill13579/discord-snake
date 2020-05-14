@@ -15,7 +15,7 @@ use serenity::{
     prelude::*,
 };
 
-use discord_snake::{Game, Vector2, Player, UP, RIGHT, DOWN, LEFT, CANCEL};
+use discord_snake::{Game, Vector2, Player, UP, RIGHT, DOWN, LEFT, CANCEL, POINTS_PER_KILL};
 
 const SNAKE_CMD: &str = r"^::(snake|solo) *(.*?) *$";
 const HELP_CMD: &str = r"^::help *$";
@@ -51,15 +51,15 @@ fn send(ctx: &Context, c: &ChannelId, msg: &str) -> Message {
 }
 
 fn stylize_ranking(ranking: &Vec<Player>) -> String {
-    let mut r = String::from("**Ranking**\n");
+    let mut r = String::from(format!("**Ranking** (`fruit = 1 | kill = {}`)\n", POINTS_PER_KILL));
     for (p, i) in ranking.iter().zip(1..ranking.len()+1) {
         let i_str = i.to_string();
-        r.push_str(&format!("    {}: <@{}>, {} points, {}\n", match i {
+        r.push_str(&format!("    {}: <@{}>, {} points | {} kills, {}\n", match i {
             1 => ":first_place:",
             2 => ":second_place:",
             3 => ":third_place:",
             _ => i_str.as_str(),
-        }, p.get_id(), p.get_score(), if p.is_dead() {
+        }, p.get_id(), p.get_score(), p.get_kills(), if p.is_dead() {
             ":x: dead"
         } else {
             ":white_check_mark: alive"
