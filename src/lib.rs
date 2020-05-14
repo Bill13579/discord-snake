@@ -119,7 +119,7 @@ pub struct Game {
 //⬆➡⬇⬅
 impl Game {
     pub fn new(game_mode: String, pid: &[u64]) -> Game {
-        let mut board = Game::empty_board();
+        let mut board = Game::empty_board(&BOARD_SIZE);
         let mut players = Vec::new();
         for p in 0..pid.len() {
             let r = (21 / (pid.len() + 1)) * (p + 1);
@@ -134,11 +134,11 @@ impl Game {
             board_size: BOARD_SIZE,
             rng: thread_rng(), }
     }
-    pub fn empty_board() -> Vec<Vec<Actor>> {
-        let mut board: Vec<Vec<Actor>> = Vec::with_capacity(BOARD_SIZE.1 as usize);
-        for i in 0..BOARD_SIZE.1 {
-            let mut row: Vec<Actor> = Vec::with_capacity(BOARD_SIZE.0 as usize);
-            for j in 0..BOARD_SIZE.0 {
+    pub fn empty_board(board_size: &Vector2) -> Vec<Vec<Actor>> {
+        let mut board: Vec<Vec<Actor>> = Vec::with_capacity(board_size.1 as usize);
+        for i in 0..board_size.1 {
+            let mut row: Vec<Actor> = Vec::with_capacity(board_size.0 as usize);
+            for j in 0..board_size.0 {
                 row.push(Actor::Empty);
             }
             board.push(row);
