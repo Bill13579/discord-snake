@@ -9,7 +9,7 @@ Invite Link: [https://discord.com/api/oauth2/authorize?client_id=709888513847459
 # Contributors
 
 - Project programming by Bill13579
-- Project icon design by Voidbreaker517
+- Project icon design by Voidbreaker
 
 # Screenshots
 
