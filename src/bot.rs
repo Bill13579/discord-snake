@@ -18,20 +18,7 @@ use serenity::{
 use discord_snake::{Game, Vector2, Player, UP, RIGHT, DOWN, LEFT, CANCEL, POINTS_PER_KILL};
 
 const SNAKE_CMD: &str = r"^::(snake|solo) *(.*?) *$";
-const HELP_CMD: &str = r"^::help *$";
-
-const HELP: &str = "**Welcome to the wonderful world of Discord Snake!**
-
-> **Commands**
-
-Normal (multiplayer)
-`::snake @you @someoneElse @up-to-5-people! @you-get-the-idea`
-
-Solo
-`::solo`
-
-Help
-`::help` (I think that's intuitive enough)";
+const NORMAL_CMD: &str = r"^::(help|invite) *$";
 
 const GAME_OVER: &str = r"   _____                         ____
  / ____|                       / __ \
@@ -50,6 +37,31 @@ fn send(ctx: &Context, c: &ChannelId, msg: &str) -> Message {
         },
         Ok(m) => m,
     }
+}
+
+fn send_help(ctx: &Context, c: &ChannelId) {
+    c.send_message(ctx.http.clone(), |m| {
+        m.embed(|e| {
+            e.title("**Welcome to the wonderful world of Discord Snake!**");
+            e.field("Multiplayer", "`::snake @you @someoneElse @up-to-5-people! @you-get-the-idea`", false);
+            e.field("Solo", "`::solo`", false);
+            e.field("Help", "`::help`", true);
+            e.field("Show Invite", "`::invite`", true);
+            e
+        });
+        m
+    });
+}
+
+fn send_invite(ctx: &Context, c: &ChannelId) {
+    c.send_message(ctx.http.clone(), |m| {
+        m.embed(|e| {
+            e.title("**Hold on a sec while I go through my drawer... Nope. Nope. Ah, There!**");
+            e.description("[https://discord.com/api/oauth2/authorize?client_id=709888513847459900&permissions=1073948736&scope=bot](https://discord.com/api/oauth2/authorize?client_id=709888513847459900&permissions=1073948736&scope=bot)");
+            e
+        });
+        m
+    });
 }
 
 fn stylize_ranking(ranking: &Vec<Player>) -> String {
@@ -184,8 +196,13 @@ impl EventHandler for Handler {
                     }
                 }
             });
-        } else if let Some(c) = Regex::new(HELP_CMD).expect("invalid regex").captures(&msg.content) {
-            send(&ctx, &msg.channel_id, HELP);
+        } else if let Some(c) = Regex::new(NORMAL_CMD).expect("invalid regex").captures(&msg.content) {
+            let cmd = c.get(1).unwrap().as_str();
+            if cmd == "help" {
+                send_help(&ctx, &msg.channel_id);
+            } else if cmd == "invite" {
+                send_invite(&ctx, &msg.channel_id);
+            }
         }
     }
     fn reaction_add(&self, ctx: Context, react: Reaction) {
@@ -195,8 +212,8 @@ impl EventHandler for Handler {
         self.react(ctx, react);
     }
     fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
-        if let Some(e) = guild.default_channel(ctx.cache.read().user.id) {
-            send(&ctx, &e.read().id, HELP);
+        if let Some(guild_channel) = guild.default_channel(ctx.cache.read().user.id) {
+            send_help(&ctx, &guild_channel.read().id);
         }
     }
 }
